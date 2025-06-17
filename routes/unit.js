@@ -1,0 +1,10 @@
+const express=require('express')
+const router = express.Router()
+const{ getUnit,getUnitById,createUnit,updateUnit,deleteUnit,getUnitCount } = require('../controllers/unit')
+router.get('/unit', getUnit)
+router.get('/unit/:id', getUnitById)
+router.post('/unit', createUnit)
+router.put('/unit/:id', updateUnit)
+router.delete('/unit/:id', deleteUnit)
+router.delete('/unitItem', getUnitCount)
+module.exports = router
