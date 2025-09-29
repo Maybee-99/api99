@@ -112,7 +112,7 @@ exports.getCategoryById = (req, res) => {
 };
 
 exports.createCategory = (req, res) => {
-  const { category_name, username } = req.body;
+  const { category_name, username, hostname } = req.body;
 
   try {
     const checkSql = 'SELECT * FROM categories WHERE category_name = ?';
@@ -128,7 +128,13 @@ exports.createCategory = (req, res) => {
         if (err) return res.status(400).send({ message: err.message });
 
         const ip = req.socket.remoteAddress?.replace('::ffff:', '') || 'unknown IP';
-        logger.info(`ເພີ່ມ ➝ ຈາກ IP: ${ip}\n` + `#ລາຍລະອຽດ:\n` + `• ລະັຫດປະເພດ: ${result.insertId}\n` + `• ປະເພດ: ${category_name}\n`+`• ຕາຕະລາງ: ປະເພດ`,);
+        logger.info(`ເພີ່ມ ➝ ຈາກ IP: ${ip}\n` +
+          `ຊື່ເຄື່ອງ:${hostname || 'N/A'}\n` +
+          `ຊື່ຜູ້ໃຊ້: ${username}\n` +
+          `#ລາຍລະອຽດ:\n` +
+          `• ລະັຫດປະເພດ: ${result.insertId}\n` +
+          `• ປະເພດ: ${category_name}\n` +
+          `• ຕາຕະລາງ: ປະເພດ`,);
 
         return res.status(201).send({ message: 'Category created', id: result.insertId });
       });
@@ -140,7 +146,7 @@ exports.createCategory = (req, res) => {
 
 exports.updateCategory = (req, res) => {
   const id = req.params.id;
-  const { category_name, username } = req.body;
+  const { category_name, username, hostname } = req.body;
 
   try {
     const getSql = "SELECT * FROM categories WHERE category_id = ?";
@@ -158,9 +164,11 @@ exports.updateCategory = (req, res) => {
           const ip = req.socket.remoteAddress?.replace('::ffff:', '') || 'unknown IP';
           logger.info(
             `ແກ້ໄຂ ➝ ຈາກ IP: ${ip}\n` +
+            `ຊື່ເຄື່ອງ:${hostname || 'N/A'}\n` +
+            `ຊື່ຜູ້ໃຊ້: ${username}\n` +
             `#ລາຍລະອຽດ:\n` +
             `• ລະຫັດປະເພດ: ${id}\n` +
-            `• ຊື້ປະເພດ: '${current.category_name}' ➝ '${category_name}'\n`+
+            `• ຊື້ປະເພດ: '${current.category_name}' ➝ '${category_name}'\n` +
             `• ຕາຕະລາງ: ປະເພດ`
           );
         }
@@ -179,6 +187,7 @@ exports.updateCategory = (req, res) => {
 
 exports.deleteCategory = (req, res) => {
   const id = req.params.id;
+  const { username, hostname } = req.body;
   const sqlDelete = 'DELETE FROM categories WHERE category_id = ?';
 
   db.query(sqlDelete, [id], (err, result) => {
@@ -193,15 +202,17 @@ exports.deleteCategory = (req, res) => {
 
     const ip = req.socket.remoteAddress?.replace('::ffff:', '') || 'unknown IP';
     logger.info(`ລຶບ ➝ ຈາກ IP: ${ip}\n` +
-                `#ລາຍລະອຽດ:\n`+
-                `ລະຫັດປະເພດ: ${id}\n`+
-                `ຈາກຕາຕະລາງ: ປະເພດ`);
+      `ຊື່ເຄື່ອງ: ${hostname || 'N/A'}\n` +
+      `ຊື່ຜູ້ໃຊ້: ${username || 'N/A'}\n` +
+      `#ລາຍລະອຽດ:\n` +
+      `ລະຫັດປະເພດ: ${id}\n` +
+      `ຈາກຕາຕະລາງ: ປະເພດ`);
 
     return res.status(200).json({ message: "Category deleted", category_id: id });
   });
 };
 
-exports.getCategoryCount=(req,res)=>{
+exports.getCategoryCount = (req, res) => {
   try {
     const sql = 'SELECT COUNT(*) AS count FROM categories';
     db.query(sql, (err, result) => {

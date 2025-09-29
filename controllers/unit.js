@@ -107,7 +107,7 @@ exports.getUnitById = (req, res) => {
 };
 
 exports.createUnit = (req, res) => {
-  const { unit_name, username } = req.body;
+  const { unit_name, username, hostname } = req.body;
 
   try {
     const checkSql = 'SELECT * FROM units WHERE unit_name = ?';
@@ -124,6 +124,8 @@ exports.createUnit = (req, res) => {
 
         const ip = req.socket.remoteAddress?.replace('::ffff:', '') || 'unknown IP';
         logger.info(`ເພີ່ມໃໝ່ ➝ ຈາກ IP: ${ip}\n` +
+          `ຊື່ເຄື່ອງ:${hostname || 'N/A'}\n` +
+          `ຊື່ຜູ້ໃຊ້: ${username}\n` +
           `#ລາຍລະອຽດ:\n` +
           `• ລະຫັດຫົວໜ່ວຍ: ${result.insertId}\n` +
           `• ຫົວໜ່ວຍ: ${unit_name}\n` +
@@ -140,7 +142,7 @@ exports.createUnit = (req, res) => {
 
 exports.updateUnit = (req, res) => {
   const id = req.params.id;
-  const { unit_name, username } = req.body;
+  const { unit_name, username, hostname } = req.body;
 
   try {
     const getSql = "SELECT * FROM units WHERE unit_id = ?";
@@ -158,6 +160,8 @@ exports.updateUnit = (req, res) => {
           const ip = req.socket.remoteAddress?.replace('::ffff:', '') || 'unknown IP';
           logger.info(
             `ແກ້ໄຂ ➝ ຈາກ IP: ${ip}\n` +
+            `ຊື່ເຄື່ອງ:${hostname || 'N/A'}\n` +
+            `ຊື່ຜູ້ໃຊ້: ${username}\n` +
             `#ລາຍລະອຽດ:\n` +
             `• ລະຫັດຫົວໜ່ວຍ: ${id}\n` +
             `• ຊື່ຫົວໜ່ວຍ: '${current.unit_name}' ➝ '${unit_name}'\n` +
@@ -178,6 +182,7 @@ exports.updateUnit = (req, res) => {
 
 exports.deleteUnit = (req, res) => {
   const id = req.params.id;
+  const { username, hostname } = req.body;
   const sqlDelete = 'DELETE FROM units WHERE unit_id = ?';
 
   db.query(sqlDelete, [id], (err, result) => {
@@ -191,14 +196,16 @@ exports.deleteUnit = (req, res) => {
     }
 
     const ip = req.socket.remoteAddress?.replace('::ffff:', '') || 'unknown IP';
-    logger.info(`ລຶບ  ➝ ຈາກ IP: ${ip}\n`+
-                `ລະຫັດຫົວໜ່ວຍ: ${id}\n`+
-                `ຈາກຕາຕະລາງ:ຫົວໜ່ວຍ`);
+    logger.info(`ລຶບ  ➝ ຈາກ IP: ${ip}\n` +
+      `ຊື່ເຄື່ອງ: ${hostname || 'N/A'}\n` +
+      `ຊື່ຜູ້ໃຊ້: ${username || 'N/A'}\n` +
+      `ລະຫັດຫົວໜ່ວຍ: ${id}\n` +
+      `ຈາກຕາຕະລາງ:ຫົວໜ່ວຍ`);
     return res.status(200).json({ message: "Unit deleted", unit_id: id });
   });
 };
 
-exports.getUnitCount=(req,res)=>{
+exports.getUnitCount = (req, res) => {
   try {
     const sql = 'SELECT COUNT(*) AS count FROM units';
     db.query(sql, (err, result) => {
